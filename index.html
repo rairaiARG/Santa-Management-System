@@ -120,6 +120,24 @@ body{background:#0a0f1e;color:#e8f4fd;font-family:'Courier New',monospace;min-he
 .org-sub{font-size:9px;color:#3a6a8a;margin-top:2px;}
 .org-line{text-align:center;color:#1e3a5f;font-size:13px;line-height:1.2;}
 .toast{position:fixed;top:56px;right:12px;z-index:300;background:#0d1528;border:1px solid #4fc3f7;padding:12px 16px;max-width:260px;cursor:pointer;box-shadow:0 4px 20px #000a;}
+
+.system-disclaimer{
+  margin-top:auto;
+  padding:12px 16px;
+  border-top:1px solid #1e3a5f;
+  background:#05070c;
+  color:#ffffff;
+  font-size:10px;
+  text-align:center;
+  line-height:1.7;
+  flex-shrink:0;
+}
+.system-disclaimer .title{
+  color:#7ecfee;
+  letter-spacing:2px;
+  margin-bottom:4px;
+}
+
 </style>
 </head>
 <body>
@@ -177,6 +195,13 @@ body{background:#0a0f1e;color:#e8f4fd;font-family:'Courier New',monospace;min-he
     </div>
     <div class="content" id="content"></div>
   </div>
+
+  <footer class="system-disclaimer">
+    <div class="title">SYSTEM NOTICE</div>
+    <div>本サイトはフィクション作品です。</div>
+    <div>実在の企業・団体・サービス・人物とは一切関係ありません。</div>
+  </footer>
+
 </div>
 
 <div class="modal-bg" id="lock-modal">
@@ -383,8 +408,10 @@ function showPage(id,skipVisit){
   };
   if(map[id])map[id](c);
   saveGame();
-  if(PT[id]){
-    var old=document.getElementById('page-num');if(old)old.remove();
+
+  // ページ番号表示（エンディング画面中は非表示）
+  var oldNum=document.getElementById('page-num');if(oldNum)oldNum.remove();
+  if(PT[id]&&document.getElementById('screen-ending').style.display!=='flex'){
     var el=document.createElement('div');el.id='page-num';
     el.style.cssText='position:fixed;bottom:14px;right:16px;font-size:10px;color:#2a4a6a;letter-spacing:1px;pointer-events:none;z-index:10;';
     el.textContent=parseInt(PT[id])+' / '+Object.keys(PT).length;
@@ -692,6 +719,9 @@ function renderApplyDone(c){
 // ── ENDING ──
 function startEnding(){
   setTimeout(function(){
+    // ページ番号を消す
+    var pn=document.getElementById('page-num');if(pn)pn.remove();
+
     document.getElementById('screen-main').style.display='none';
     document.getElementById('screen-ending').style.display='flex';
     var el=document.getElementById('ending-hina');
@@ -712,18 +742,46 @@ function startEnding(){
         setTimeout(function(){
           document.getElementById('end-bar').style.width='100%';
           document.getElementById('end-pct').textContent='100%';
+          // 100%アニメーション完了後（transitionが1.5s）に背景を変更
           setTimeout(function(){
+
+            document.getElementById('screen-ending').innerHTML='';
+            var line=document.createElement('div');
+            line.style.cssText='position:fixed;top:20px;left:50%;transform:translateX(-50%);background:#f5f5f7;color:#000;border-radius:18px;padding:14px 16px;z-index:9999;min-width:320px;box-shadow:0 8px 30px rgba(0,0,0,.25);font-family:sans-serif;';
+            line.innerHTML='<div style="font-size:12px;color:#666">💬 LINE</div><div style="font-weight:bold">白雪 緋奈</div><div>写真を送信しました</div>';
+            document.body.appendChild(line);
+            setTimeout(function(){line.remove();
+
+            document.body.style.backgroundImage='url(taikutu.png)';
+            document.body.style.backgroundSize='contain';
+            document.body.style.backgroundPosition='center';
+            document.body.style.backgroundRepeat='no-repeat';
+
             var btn=document.createElement('button');
             btn.className='btn';btn.style.cssText='width:200px;margin-top:24px;';
             btn.textContent='管理画面に戻る';
             btn.onclick=function(){
+              document.body.style.backgroundImage='';
+              document.body.style.backgroundSize='';
+              document.body.style.backgroundPosition='';
+              document.body.style.backgroundRepeat='';
               document.getElementById('screen-ending').style.display='none';
               document.getElementById('screen-main').style.display='flex';
               el.innerHTML='';
               showPage('home');
             };
-            document.getElementById('end-btn-wrap').appendChild(btn);
-          },1000);
+            setTimeout(function(){
+var wrap=document.getElementById('end-btn-wrap');
+wrap.style.position='fixed';
+wrap.style.left='50%';
+wrap.style.bottom='40px';
+wrap.style.transform='translateX(-50%)';
+wrap.style.zIndex='999999';
+wrap.style.display='block';
+wrap.appendChild(btn);
+},3000);
+            },1200);
+          },1800);
         },500);
         return;
       }
